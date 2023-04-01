@@ -44,7 +44,7 @@ def chatbot(text_path: str, model: str):
             # Generate a response using OpenAI's ChatCompletion endpoint
             response = openai.ChatCompletion.create(model=model, messages=messages)
 
-            assistant_response = response.choices[0].message["content"]
+            assistant_response = response.choices[0].message["content"].strip()
 
             # Create an assistant message and add it to the conversation
             assistant_message = create_chat_message("assistant", assistant_response)

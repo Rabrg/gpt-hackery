@@ -7,12 +7,12 @@ from bs4 import BeautifulSoup
 from ebooklib import epub
 
 
-def extract_epub_text(book_path: str):
+def extract_epub_text(book_path: str, output_path: str):
     encoding = tiktoken.get_encoding("cl100k_base")
     book = epub.read_epub(book_path, options={"ignore_ncx": True})
 
     # Create the output directory if it does not exist
-    output_dir = f"socrates/text/{os.path.splitext(os.path.basename(book_path))[0]}"
+    output_dir = f"{output_path}{os.path.splitext(os.path.basename(book_path))[0]}"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -27,14 +27,18 @@ def extract_epub_text(book_path: str):
             chapter_filename = f"Chapter_{chapter_title.replace('/', '-').replace(':', '-')}.txt"
 
             # Save chapter text to a file
-            with open(os.path.join(output_dir, chapter_filename), "w", encoding="utf-8") as f:
+            chapter_path = os.path.join(output_dir, chapter_filename)
+            with open(chapter_path, "w", encoding="utf-8") as f:
                 f.write(soup.get_text())
-                print(f"{chapter_filename} ({len(encoding.encode(soup.get_text()))} tokens)")
+                print(f"{chapter_path} ({len(encoding.encode(soup.get_text()))} tokens)")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract chapters from an EPUB file")
     parser.add_argument("book_path", help="Path to the EPUB file")
+    parser.add_argument(
+        "--output_path", default="socrates/text/", help="Path to the output directory"
+    )
     args = parser.parse_args()
 
-    extract_epub_text(args.book_path)
+    extract_epub_text(args.book_path, args.output_path)
